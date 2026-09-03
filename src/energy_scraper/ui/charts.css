@@ -1,0 +1,8 @@
+.chart-tools { display:flex; align-items:center; gap:5px; }
+.chart-tools button { border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:4px; min-width:28px; padding:4px 7px; cursor:pointer; }
+.chart-tools button:hover { border-color:var(--green); color:var(--green); }
+.hover-point, .hover-bar, .candle rect { cursor:crosshair; }
+.hover-point:hover, .hover-bar:hover, .candle rect:hover { filter:brightness(1.25); stroke:var(--ink); stroke-width:1; }
+.group-row td { position:sticky; top:0; background:#e8eee8; color:var(--green); font-weight:800; letter-spacing:.04em; border-top:2px solid var(--card); }
+.group-row span { margin-left:8px; color:var(--muted); font-weight:500; font-size:10px; }
+#future-group { background:var(--card); border:1px solid var(--line); border-radius:4px; padding:6px 9px; color:var(--ink); }

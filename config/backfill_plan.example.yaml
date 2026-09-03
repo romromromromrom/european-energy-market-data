@@ -1,0 +1,10 @@
+eex_fr_base_year:
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: explicit
+  status: PENDING
+nordpool_intraday_fr:
+  requested_start: 2026-08-25
+  requested_end: today
+  mode: explicit
+  status: PENDING

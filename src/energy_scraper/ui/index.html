@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>European Energy Desk</title>
+  <link rel="stylesheet" href="/ui/styles.css?v=20260902-2">
+  <link rel="stylesheet" href="/ui/charts.css?v=20260902-3">
+</head>
+<body>
+  <aside>
+    <div class="brand"><span class="brandmark">E</span><div><strong>EUROPEAN</strong><small>ENERGY DESK</small></div></div>
+    <nav>
+      <button class="nav active" data-view="overview"><span>⌁</span>Vue d’ensemble</button>
+      <button class="nav" data-view="backfill"><span>↺</span>Backfill</button>
+      <button class="nav" data-view="futures"><span>↗</span>Futures EEX</button>
+      <button class="nav" data-view="intraday"><span>ϟ</span>Intraday</button>
+      <button class="nav" data-view="quality"><span>◇</span>Qualité & gaps</button>
+    </nav>
+    <div class="side-foot"><span id="health-dot"></span><div><b id="health-text">Connexion…</b><small>API locale · lecture seule</small></div></div>
+  </aside>
+  <main>
+    <header><div><p class="eyebrow">MARKET INTELLIGENCE</p><h1 id="page-title">Vue d’ensemble</h1></div><div class="header-actions"><span id="last-update">—</span><button id="refresh">↻ Actualiser</button></div></header>
+    <section id="overview" class="view active">
+      <div class="metric-grid">
+        <article class="metric accent"><p>FR BASE CAL-27</p><div><strong id="base-price">—</strong><span>€/MWh</span></div><small id="base-date">Dernier settlement</small></article>
+        <article class="metric"><p>CONTRATS INTRADAY</p><div><strong id="contract-count">—</strong><span>observations</span></div><small>PH · HH · QH préservés</small></article>
+        <article class="metric"><p>COUVERTURE</p><div><strong id="coverage-rate">—</strong><span>%</span></div><small id="coverage-detail">Calendriers attendus</small></article>
+        <article class="metric warning"><p>GAPS OUVERTS</p><div><strong id="gap-count">—</strong><span>points</span></div><small>Jamais convertis en zéro</small></article>
+      </div>
+      <div class="dashboard-grid">
+        <article class="panel chart-panel"><div class="panel-head"><div><p class="eyebrow">EEX · FRANCE</p><h2>Courbe des settlements</h2></div><span class="pill">CAL-2027</span></div><div id="price-chart" class="chart"></div></article>
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">NORD POOL</p><h2>Mix contrats</h2></div></div><div id="mix-chart" class="donut-wrap"></div></article>
+      </div>
+      <article class="panel"><div class="panel-head"><div><p class="eyebrow">DERNIÈRES OBSERVATIONS</p><h2>Flux de marché</h2></div><span class="live">● LIVE DATABASE</span></div><div class="table-wrap"><table><thead><tr><th>Marché</th><th>Produit</th><th>Date</th><th>Valeur</th><th>Unité</th><th>Qualité</th></tr></thead><tbody id="recent-table"></tbody></table></div></article>
+    </section>
+    <section id="backfill" class="view">
+      <div class="metric-grid">
+        <article class="metric accent"><p>PRIORITÉ</p><div><strong id="bf-ready">—</strong><span>actifs</span></div><small>Datasets exécutables tout de suite</small></article>
+        <article class="metric"><p>EN ATTENTE</p><div><strong id="bf-skipped">—</strong><span>plans</span></div><small>Collectors non encore implémentés</small></article>
+        <article class="metric warning"><p>DERNIER RATTRAPAGE</p><div><strong id="bf-last-run">—</strong><span>run</span></div><small id="bf-last-detail">Aucun run backfill</small></article>
+        <article class="metric"><p>BORNE HISTORIQUE</p><div><strong id="bf-cutoff">—</strong><span>auto</span></div><small>Dernière date avec données observées</small></article>
+      </div>
+      <article class="panel">
+        <div class="panel-head"><div><p class="eyebrow">PLAN DE RATTRAPAGE</p><h2>Backfill piloté par dataset</h2></div><div class="header-actions"><span class="pill" id="bf-plan-path">—</span><button id="backfill-run">Lancer le rattrapage</button></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Source</th><th>Scope</th><th>Priorité</th><th>Mode</th><th>Statut</th><th>Début demandé</th><th>Première donnée</th><th>Produit le plus ancien</th><th>Jour indisponible</th></tr></thead><tbody id="backfill-table"></tbody></table></div>
+      </article>
+    </section>
+    <section id="futures" class="view"><div class="toolbar"><select id="future-area"><option value="">Toutes zones</option><option>FR</option><option>TTF</option></select><select id="future-code"><option value="">Tous produits</option><option>F7BY</option><option>F7PY</option><option>G3BY</option></select><select id="future-maturity"><option value="">Toutes maturités</option></select><input id="future-start" type="date" title="Date de cotation — début"><input id="future-end" type="date" title="Date de cotation — fin"><button id="future-filter">Filtrer</button></div><div class="dashboard-grid"><article class="panel chart-panel"><div class="panel-head"><div><p class="eyebrow">ÉVOLUTION</p><h2>Settlement par contrat</h2></div><span class="pill" id="future-chart-label">Toutes maturités</span></div><div id="future-price-chart" class="chart"></div></article><article class="panel chart-panel"><div class="panel-head"><div><p class="eyebrow">COMPARAISON</p><h2>Dernier settlement</h2></div></div><div id="future-latest-chart" class="chart"></div></article></div><article class="panel"><div class="panel-head"><div><p class="eyebrow">SETTLEMENTS</p><h2>Futures EEX</h2></div><div class="header-actions"><label for="future-group">Regrouper par</label><select id="future-group"><option value="none">Aucun groupe</option><option value="maturity">Maturité</option><option value="product">Produit</option><option value="product_maturity">Produit puis maturité</option></select><span id="future-total" class="pill">0 lignes</span></div></div><div class="table-wrap"><table><thead><tr><th>Code</th><th>Maturité</th><th>Zone</th><th>Trading date</th><th>Settlement</th><th>Volume</th><th>Open interest</th><th>Source</th></tr></thead><tbody id="futures-table"></tbody></table></div></article></section>
+    <section id="intraday" class="view"><div class="toolbar"><select id="intra-area"><option>FR</option><option>BE</option><option>DE-LU</option></select><select id="intra-resolution"><option value="">Toutes résolutions</option><option value="15">QH · 15 min</option><option value="30">HH · 30 min</option><option value="60">PH · 60 min</option></select><input id="intra-start" type="date"><input id="intra-end" type="date"><button id="intra-filter">Filtrer</button></div><div class="dashboard-grid"><article class="panel chart-panel"><div class="panel-head"><div><p class="eyebrow">OHLC · HIGH/LOW</p><h2>Chandeliers intraday</h2></div><div class="chart-tools"><button class="zoom-btn" data-target="intra-candle-chart" data-zoom="out">−</button><button class="zoom-btn" data-target="intra-candle-chart" data-zoom="reset">100%</button><button class="zoom-btn" data-target="intra-candle-chart" data-zoom="in">+</button></div></div><div id="intra-candle-chart" class="chart"></div></article><article class="panel chart-panel"><div class="panel-head"><div><p class="eyebrow">PRIX MOYENS</p><h2>Courbes VWAP · 1h · 3h</h2></div><div class="chart-tools"><button class="zoom-btn" data-target="intra-vwap-chart" data-zoom="out">−</button><button class="zoom-btn" data-target="intra-vwap-chart" data-zoom="reset">100%</button><button class="zoom-btn" data-target="intra-vwap-chart" data-zoom="in">+</button></div></div><div id="intra-vwap-chart" class="chart"></div></article></div><article class="panel"><div class="panel-head"><div><p class="eyebrow">NORD POOL</p><h2>Statistiques contractuelles</h2></div><span id="intra-total" class="pill">0 lignes</span></div><div class="table-wrap"><table><thead><tr><th>Contrat</th><th>Type</th><th>Livraison</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>VWAP</th><th>Vol.</th></tr></thead><tbody id="intraday-table"></tbody></table></div></article></section>
+    <section id="quality" class="view"><div class="quality-grid"><article class="metric"><p>INTÉGRITÉ</p><div><strong>OK</strong><span>SQLite</span></div><small>WAL · append-only</small></article><article class="metric warning"><p>GAPS OUVERTS</p><div><strong id="quality-gaps">—</strong><span>points</span></div><small>Audit trail conservé</small></article></div><article class="panel"><div class="panel-head"><div><p class="eyebrow">DATA QUALITY</p><h2>Registre des trous</h2></div></div><div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Série</th><th>Timestamp attendu</th><th>Champs</th><th>Statut</th><th>Source</th></tr></thead><tbody id="gaps-table"></tbody></table></div><div id="empty-gaps" class="empty">Aucun gap ouvert enregistré.</div></article></section>
+  </main>
+  <div id="toast"></div><script src="/ui/app.js?v=20260902-3"></script>
+</body></html>

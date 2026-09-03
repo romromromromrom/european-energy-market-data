@@ -1,0 +1,44 @@
+eex:
+  base_url: "https://api.eex-group.com/pub/market-data"
+  method: direct_api
+  fallback: playwright
+  capture_network_on_fallback: true
+  license_notes: "Publicly reachable market-data endpoint; verify EEX terms before redistribution. No paywall or authentication bypass."
+nordpool:
+  base_url: "https://dataportal-api.nordpoolgroup.com/api/IntradayMarketStatistics"
+  areas: [FR, BE, DE-LU]
+  method: direct_api
+  fallback: playwright
+  capture_network_on_fallback: true
+  license_notes: "Private historical use subject to Nord Pool data terms; do not republish in bulk without rights."
+entsog:
+  base_url: "https://gasdashboard.entsog.eu/"
+  method: not_implemented
+  license_notes: "Prefer official Transparency Platform datasets; Power BI discovery requires legal review."
+entsoe:
+  base_url: "https://web-api.tp.entsoe.eu/api"
+  token_env: "ENTSOE_API_TOKEN"
+  method: planned_official_api
+energy_charts:
+  base_url: "https://api.energy-charts.info/"
+  method: planned_open_api
+rte:
+  base_url: "https://odre.opendatasoft.com/"
+  method: planned_open_data
+electricity_maps:
+  base_url: "https://app.electricitymaps.com/"
+  method: discovery_only
+  license_notes: "Do not use non-public or paid API data without a valid licence."
+api:
+  enabled: true
+  bind_host: "127.0.0.1"
+  port: 8765
+  read_only: true
+  default_limit: 1000
+  max_limit: 5000
+  auth:
+    enabled: true
+    token_env: "ENERGY_API_TOKEN"
+  public_tunnel:
+    enabled: false
+    provider: null

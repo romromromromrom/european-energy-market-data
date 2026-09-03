@@ -1,0 +1,228 @@
+eex_fr_base_year:
+  dataset_id: eex_fr_base_year
+  source: EEX
+  collector: eex
+  partitioning: code+year
+  scope: FR Base Year settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: max
+  status: PENDING
+eex_fr_peak_year:
+  dataset_id: eex_fr_peak_year
+  source: EEX
+  collector: eex
+  partitioning: code+year
+  scope: FR Peak Year settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: max
+  status: PENDING
+eex_ttf_year:
+  dataset_id: eex_ttf_year
+  source: EEX
+  collector: eex
+  partitioning: code+year
+  scope: TTF Year settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: max
+  status: PENDING
+nordpool_intraday_fr:
+  dataset_id: nordpool_intraday_fr
+  source: Nord Pool
+  collector: nordpool
+  partitioning: area+day
+  scope: FR intraday snapshots
+  priority: 1
+  legal_class: restricted_private_use
+  requested_start: 2026-08-25
+  requested_end: today
+  mode: max
+  status: PENDING
+nordpool_intraday_be:
+  dataset_id: nordpool_intraday_be
+  source: Nord Pool
+  collector: nordpool
+  partitioning: area+day
+  scope: BE intraday snapshots
+  priority: 1
+  legal_class: restricted_private_use
+  requested_start: 2026-08-25
+  requested_end: today
+  mode: max
+  status: PENDING
+nordpool_intraday_de_lu:
+  dataset_id: nordpool_intraday_de_lu
+  source: Nord Pool
+  collector: nordpool
+  partitioning: area+day
+  scope: DE-LU intraday snapshots
+  priority: 1
+  legal_class: restricted_private_use
+  requested_start: 2026-08-25
+  requested_end: today
+  mode: max
+  status: PENDING
+day_ahead_fr:
+  dataset_id: day_ahead_fr
+  source: ENTSO-E / Energy-Charts
+  collector: planned
+  partitioning: day
+  scope: FR day-ahead prices
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+day_ahead_de:
+  dataset_id: day_ahead_de
+  source: ENTSO-E / Energy-Charts
+  collector: planned
+  partitioning: day
+  scope: DE day-ahead prices
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+day_ahead_be:
+  dataset_id: day_ahead_be
+  source: ENTSO-E / Energy-Charts
+  collector: planned
+  partitioning: day
+  scope: BE day-ahead prices
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+power_state_fr:
+  dataset_id: power_state_fr
+  source: RTE / ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: FR power system state
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+power_state_de:
+  dataset_id: power_state_de
+  source: ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: DE power system state
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+power_state_be:
+  dataset_id: power_state_be
+  source: ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: BE power system state
+  priority: 2
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+interconnectors:
+  dataset_id: interconnectors
+  source: ENTSO-E / RTE
+  collector: planned
+  partitioning: day
+  scope: Interconnector flows
+  priority: 3
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+nuclear:
+  dataset_id: nuclear
+  source: RTE / ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: Nuclear production
+  priority: 3
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+hydro:
+  dataset_id: hydro
+  source: RTE / ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: Hydro production
+  priority: 3
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+wind_solar:
+  dataset_id: wind_solar
+  source: RTE / ENTSO-E
+  collector: planned
+  partitioning: day
+  scope: Wind and solar production
+  priority: 3
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+gas_storage:
+  dataset_id: gas_storage
+  source: ENTSOG
+  collector: planned
+  partitioning: day
+  scope: Gas storage
+  priority: 4
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+gas_flows:
+  dataset_id: gas_flows
+  source: ENTSOG
+  collector: planned
+  partitioning: day
+  scope: Gas flows
+  priority: 4
+  legal_class: planned_official_api
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
+tbx:
+  dataset_id: tbx
+  source: EPEX
+  collector: planned
+  partitioning: day
+  scope: TBX market data
+  priority: 4
+  legal_class: license_review_required
+  requested_start: today
+  requested_end: today
+  mode: skip
+  status: SKIPPED
