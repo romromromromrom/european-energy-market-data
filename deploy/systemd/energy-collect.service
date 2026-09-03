@@ -1,0 +1,13 @@
+[Unit]
+Description=Daily European energy market collection
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Projets/european-energy-market-data
+EnvironmentFile=%h/.config/energy-scraper/environment
+ExecStart=%h/Projets/european-energy-market-data/.venv/bin/python -m energy_scraper collect daily
+ExecStartPost=%h/Projets/european-energy-market-data/.venv/bin/python -m energy_scraper validate
+NoNewPrivileges=true
+PrivateTmp=true

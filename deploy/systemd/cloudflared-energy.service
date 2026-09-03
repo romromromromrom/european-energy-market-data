@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudflare Tunnel for the private energy API origin
+After=network-online.target energy-api.service
+Wants=network-online.target energy-api.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cloudflared tunnel --config %h/.config/cloudflared/energy.yml run
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

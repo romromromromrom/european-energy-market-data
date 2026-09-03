@@ -1,0 +1,6 @@
+tunnel: replace-with-tunnel-uuid
+credentials-file: /home/replace-me/.cloudflared/replace-with-tunnel-uuid.json
+ingress:
+  - hostname: energy-origin.example.com
+    service: http://127.0.0.1:8765
+  - service: http_status:404

@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "european-energy-market-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  // Add the real hostname before deploying, for example:
+  // "routes": [{ "pattern": "energy-mcp.example.com", "custom_domain": true }],
+  "vars": {
+    "ORIGIN_BASE_URL": "https://energy-origin.example.com",
+    "MAX_WINDOW_DAYS": "90"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

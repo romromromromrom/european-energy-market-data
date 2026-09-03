@@ -1,0 +1,17 @@
+[Unit]
+Description=European Energy Market read-only API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Projets/european-energy-market-data
+EnvironmentFile=%h/.config/energy-scraper/environment
+ExecStart=%h/Projets/european-energy-market-data/.venv/bin/python -m energy_scraper api serve --host 127.0.0.1 --port 8765
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

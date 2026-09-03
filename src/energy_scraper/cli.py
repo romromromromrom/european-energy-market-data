@@ -87,6 +87,24 @@ def collect_all(date_:str|None=typer.Option(None,"--date")):
     typer.echo(json.dumps({"eex":EexCollector(settings,db).collect(day-timedelta(days=7),day),"nordpool":NordPoolCollector(settings,db).collect(day,day,["FR","BE","DE-LU"])},indent=2))
 
 
+@collect_app.command("daily")
+def collect_daily(date_:str|None=typer.Option(None,"--date",help="Reference day; defaults to today")):
+    """Refresh EEX and the previous Nord Pool delivery day for the daily brief."""
+    settings,db=context(); day=parse_date(date_,"date") or date.today(); results={}; errors={}
+    try:
+        results["eex"]=EexCollector(settings,db).collect(day-timedelta(days=7),day)
+    except Exception as exc:
+        errors["eex"]=str(exc)
+    try:
+        delivery_day=day-timedelta(days=1)
+        results["nordpool"]=NordPoolCollector(settings,db).collect(delivery_day,delivery_day,["FR","BE","DE-LU"])
+    except Exception as exc:
+        errors["nordpool"]=str(exc)
+    payload={"reference_date":str(day),"results":results,"errors":errors,"status":"SUCCESS" if not errors else "PARTIAL"}
+    typer.echo(json.dumps(payload,indent=2))
+    if errors: raise typer.Exit(1)
+
+
 @app.command("validate")
 def validate():
     settings,db=context()

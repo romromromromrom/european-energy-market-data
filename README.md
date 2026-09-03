@@ -127,6 +127,20 @@ un client local. Sans `ENERGY_API_TOKEN`, l'API reste utilisable sans en-tête m
 la CLI refuse tout bind non local. Pour un accès distant, utiliser un tunnel HTTPS
 authentifié et un export borné ; ne jamais exposer directement le fichier SQLite.
 
+### App privée pour une tâche ChatGPT
+
+Le dépôt contient une passerelle MCP Cloudflare read-only pour donner à une tâche
+ChatGPT un accès authentifié aux données fraîches, sans exposer SQLite. Les routes
+`/v1/brief/*` sont limitées à 90 jours et la commande suivante actualise les deux
+sources pour le brief du matin :
+
+```bash
+.venv/bin/python -m energy_scraper collect daily
+```
+
+Le déploiement nécessite un domaine Cloudflare, un tunnel vers l'API locale et
+Managed OAuth devant le Worker. Suivre le guide [ChatGPT MCP privé](docs/CHATGPT_MCP.md).
+
 ## Exports et gaps
 
 Exporter une plage au format CSV :

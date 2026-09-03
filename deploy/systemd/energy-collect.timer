@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh European energy data before the 08:00 brief
+
+[Timer]
+OnCalendar=*-*-* 07:15:00 Europe/Paris
+Persistent=true
+RandomizedDelaySec=60
+Unit=energy-collect.service
+
+[Install]
+WantedBy=timers.target

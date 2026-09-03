@@ -25,6 +25,7 @@ from energy_scraper.core.config import Settings
 from energy_scraper.core.database import Database
 from energy_scraper.core.backfill import BackfillRunner
 from energy_scraper.core.wizard import validate_plan
+from energy_scraper.api.brief import data_status, futures_settlements, gaps as brief_gaps, intraday_contracts
 
 DATASETS = {
  "futures": {"table":"market_prices p JOIN instruments i ON p.instrument_id=i.instrument_id JOIN sources s ON p.source_id=s.source_id",
@@ -52,10 +53,14 @@ def create_app(settings: Settings | None=None) -> FastAPI:
     app.mount("/ui",StaticFiles(directory=ui_dir),name="ui")
     api_cfg=(settings.sources().get("api") or {}); max_limit=int(api_cfg.get("max_limit",5000)); auth_cfg=api_cfg.get("auth") or {}
 
+    require_token = os.getenv("ENERGY_API_REQUIRE_TOKEN", "false").lower() in {"1", "true", "yes"}
+
     def authorize(authorization: str | None=Header(default=None)) -> None:
         if not auth_cfg.get("enabled",True): return
         expected=os.getenv(auth_cfg.get("token_env","ENERGY_API_TOKEN"))
-        if not expected: return  # local-only deployment can operate without a token
+        if not expected:
+            if require_token: raise HTTPException(503,"API token is required but not configured")
+            return  # local-only deployment can operate without a token
         supplied=authorization.removeprefix("Bearer ") if authorization else ""
         if not hmac.compare_digest(supplied,expected): raise HTTPException(401,"Invalid bearer token")
 
@@ -88,6 +93,26 @@ def create_app(settings: Settings | None=None) -> FastAPI:
 
     @app.get("/v1/datasets")
     def datasets(_:None=Depends(authorize)): return {"data":list(DATASETS)}
+
+    @app.get("/v1/brief/status")
+    def brief_status(_:None=Depends(authorize)):
+        with ro() as conn:
+            return data_status(conn)
+
+    @app.get("/v1/brief/futures")
+    def brief_futures(start:str|None=None,end:str|None=None,product_codes:str|None=None,maturities:str|None=None,_:None=Depends(authorize)):
+        with ro() as conn:
+            return futures_settlements(conn,start,end,product_codes,maturities)
+
+    @app.get("/v1/brief/intraday")
+    def brief_intraday(start:str|None=None,end:str|None=None,areas:str|None=None,resolutions:str|None=None,_:None=Depends(authorize)):
+        with ro() as conn:
+            return intraday_contracts(conn,start,end,areas,resolutions)
+
+    @app.get("/v1/brief/gaps")
+    def brief_open_gaps(dataset:str|None=None,start:str|None=None,end:str|None=None,_:None=Depends(authorize)):
+        with ro() as conn:
+            return brief_gaps(conn,dataset,start,end)
 
     @app.get("/v1/backfill-plan")
     def backfill_plan(_:None=Depends(authorize)):

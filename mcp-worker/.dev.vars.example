@@ -1,0 +1,5 @@
+ORIGIN_BASE_URL=http://127.0.0.1:8765
+ORIGIN_API_TOKEN=replace-with-a-long-random-value
+CF_ACCESS_CLIENT_ID=replace-with-origin-service-token-id
+CF_ACCESS_CLIENT_SECRET=replace-with-origin-service-token-secret
+MAX_WINDOW_DAYS=90
