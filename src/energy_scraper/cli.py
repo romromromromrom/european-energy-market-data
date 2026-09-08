@@ -16,6 +16,7 @@ from .collectors.nordpool import NordPoolCollector
 from .core.config import Settings
 from .core.database import Database
 from .core.backfill import BackfillRunner
+from .core.brief_export import export_brief_csv
 from .core.gaps import export_gap_template, import_gap_csv
 from .core.wizard import default_plan, run_wizard, serialize_plan, validate_plan
 
@@ -133,6 +134,19 @@ def export(dataset:str,start:str,end:str,output:Path=Path("export.csv")):
         with output.open("w",newline="",encoding="utf-8") as fh:
             writer=csv.writer(fh); writer.writerow(rows[0].keys() if rows else []); writer.writerows(rows)
     typer.echo(f"{len(rows)} rows -> {output}")
+
+
+@app.command("export-brief")
+def export_brief(
+    output:Path=typer.Option(Path("reports/morning_brief.csv"),"--output","-o"),
+    end:str|None=typer.Option(None,"--end",help="Last data date; defaults to today"),
+    days:int=typer.Option(7,"--days",min=1,max=90,help="Rolling data window"),
+):
+    """Export the bounded morning-brief dataset as one atomic CSV file."""
+    _,db=context(); end_date=parse_date(end,"end") or date.today()
+    with db.connect(read_only=True) as conn:
+        count=export_brief_csv(conn,output,end_date,days)
+    typer.echo(f"{count} rows -> {output}")
 
 
 @app.command("discover-network")

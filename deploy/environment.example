@@ -2,3 +2,5 @@ ENERGY_API_TOKEN=replace-with-a-long-random-value
 ENERGY_API_REQUIRE_TOKEN=true
 ENERGY_HTTP_TIMEOUT=30
 ENERGY_MAX_ATTEMPTS=3
+ENERGY_BRIEF_OUTPUT=/home/replace-me/Projets/european-energy-market-data/reports/morning_brief.csv
+ENERGY_DRIVE_DESTINATION=gdrive:Energy Market Morning Brief/morning_brief.csv

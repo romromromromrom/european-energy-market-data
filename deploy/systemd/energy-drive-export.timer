@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish the energy morning brief before the 08:00 ChatGPT task
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 Europe/Paris
+Persistent=true
+RandomizedDelaySec=60
+Unit=energy-drive-export.service
+
+[Install]
+WantedBy=timers.target

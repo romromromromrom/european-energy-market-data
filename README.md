@@ -129,8 +129,23 @@ authentifié et un export borné ; ne jamais exposer directement le fichier SQLi
 
 ### App privée pour une tâche ChatGPT
 
-Le dépôt contient une passerelle MCP Cloudflare read-only pour donner à une tâche
-ChatGPT un accès authentifié aux données fraîches, sans exposer SQLite. Les routes
+La solution la plus simple ne publie aucune API : un export CSV quotidien peut
+être synchronisé vers un fichier privé Google Drive, puis lu par une tâche
+ChatGPT via l'app Google Drive. Suivre le guide
+[ChatGPT depuis Google Drive](docs/CHATGPT_DRIVE.md).
+
+```bash
+.venv/bin/python -m energy_scraper export-brief \
+  --output reports/morning_brief.csv
+```
+
+Le CSV regroupe l'état de fraîcheur, les futures, l'intraday et les gaps sur une
+fenêtre glissante de sept jours. Sa génération est atomique et la fenêtre peut
+être ajustée entre 1 et 90 jours avec `--days`.
+
+Pour un accès interactif aux données sans fichier intermédiaire, le dépôt contient
+également une passerelle MCP Cloudflare read-only donnant à ChatGPT un accès
+authentifié aux données fraîches sans exposer SQLite. Les routes
 `/v1/brief/*` sont limitées à 90 jours et la commande suivante actualise les deux
 sources pour le brief du matin :
 

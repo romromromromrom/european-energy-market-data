@@ -8,5 +8,6 @@ data/*.sqlite*
 logs/*.jsonl
 logs/*.log
 artifacts/network_discovery/*.json
+reports/morning_brief.csv
 !data/raw/.gitkeep
 !data/parquet/.gitkeep

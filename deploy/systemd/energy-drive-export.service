@@ -1,0 +1,14 @@
+[Unit]
+Description=Export European energy morning brief to Google Drive
+After=network-online.target energy-collect.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Projets/european-energy-market-data
+EnvironmentFile=%h/.config/energy-scraper/environment
+ExecStart=%h/Projets/european-energy-market-data/.venv/bin/python -m energy_scraper validate
+ExecStart=%h/Projets/european-energy-market-data/.venv/bin/python -m energy_scraper export-brief --output ${ENERGY_BRIEF_OUTPUT}
+ExecStart=/usr/bin/rclone copyto ${ENERGY_BRIEF_OUTPUT} "${ENERGY_DRIVE_DESTINATION}"
+NoNewPrivileges=true
+PrivateTmp=true
