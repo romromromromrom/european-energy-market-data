@@ -113,6 +113,15 @@ CREATE TABLE IF NOT EXISTS rte_balancing_volumes (
  source_id TEXT NOT NULL, run_id TEXT NOT NULL, raw_payload_hash TEXT, quality_status TEXT NOT NULL DEFAULT 'valid',
  UNIQUE(source_id,delivery_date,period_start,direction,reserve_type,metric,source_field)
 );
+CREATE TABLE IF NOT EXISTS rte_balancing_prices (
+ id INTEGER PRIMARY KEY AUTOINCREMENT, delivery_date TEXT NOT NULL, period_start TEXT NOT NULL,
+ period_end TEXT NOT NULL, timezone TEXT NOT NULL, direction TEXT, reserve_type TEXT,
+ price_type TEXT NOT NULL, price_eur_mwh REAL, unit TEXT NOT NULL DEFAULT 'EUR/MWh',
+ source_field TEXT NOT NULL, source_update_time TEXT, collected_at TEXT NOT NULL,
+ source_id TEXT NOT NULL, run_id TEXT NOT NULL, raw_payload_hash TEXT,
+ quality_status TEXT NOT NULL DEFAULT 'valid',
+ UNIQUE(source_id,delivery_date,period_start,direction,price_type,source_field)
+);
 CREATE TABLE IF NOT EXISTS collection_partitions (
  dataset_id TEXT NOT NULL, partition_key TEXT NOT NULL, status TEXT NOT NULL,
  collected_at TEXT NOT NULL, records_received INTEGER NOT NULL, run_id TEXT NOT NULL,
@@ -158,6 +167,7 @@ CREATE INDEX IF NOT EXISTS ix_market_prices_date ON market_prices(trading_date, 
 CREATE INDEX IF NOT EXISTS ix_intraday_area_date ON intraday_contract_stats(delivery_area, delivery_date);
 CREATE INDEX IF NOT EXISTS ix_epex_date ON epex_day_ahead_prices(market_area,delivery_date);
 CREATE INDEX IF NOT EXISTS ix_rte_balancing_date ON rte_balancing_volumes(delivery_date);
+CREATE INDEX IF NOT EXISTS ix_rte_balancing_prices_date ON rte_balancing_prices(delivery_date);
 CREATE INDEX IF NOT EXISTS ix_gaps_query ON data_gaps(dataset_id, gap_status, expected_timestamp_utc);
 CREATE INDEX IF NOT EXISTS ix_runs_started ON scrape_runs(started_at);
 CREATE INDEX IF NOT EXISTS ix_backfill_executions_started ON backfill_executions(started_at);

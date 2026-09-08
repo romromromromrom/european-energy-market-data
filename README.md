@@ -20,6 +20,7 @@ Nord Pool reste explicitement une statistique intraday.
 energy-scraper collect eex --codes F7BM,F7BQ,F7PM,F7PQ --maturities 202610,202701
 energy-scraper collect epex --date 2026-09-08
 energy-scraper collect rte-balancing --date 2026-09-07
+energy-scraper collect rte-prices --date 2026-09-07
 ```
 
 Les autres sources du catalogue sont des pistes d'intégration. Le collecteur ne

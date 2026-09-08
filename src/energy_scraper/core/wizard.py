@@ -31,6 +31,7 @@ DATASETS: list[BackfillDataset] = [
     BackfillDataset("eex_fr_peak_quarter", "EEX", "eex", "code+maturity+window", "FR Peak Quarter settlements", 1, "public_api", "skip"),
     BackfillDataset("epex_day_ahead_fr", "EPEX SPOT", "epex", "day", "FR SDAC 15-minute Day-Ahead", 1, "public_market_results", "skip"),
     BackfillDataset("rte_balancing_volumes_fr", "RTE", "rte_balancing", "day", "FR balancing volumes", 1, "open_data", "skip"),
+    BackfillDataset("rte_balancing_prices_fr", "RTE", "rte_prices", "day", "FR reserve and imbalance prices", 1, "open_data", "skip"),
     BackfillDataset("nordpool_intraday_fr", "Nord Pool", "nordpool", "area+day", "FR intraday snapshots", 1, "restricted_private_use", "explicit", "2026-08-25"),
     BackfillDataset("nordpool_intraday_be", "Nord Pool", "nordpool", "area+day", "BE intraday snapshots", 1, "restricted_private_use", "explicit", "2026-08-25"),
     BackfillDataset("nordpool_intraday_de_lu", "Nord Pool", "nordpool", "area+day", "DE-LU intraday snapshots", 1, "restricted_private_use", "explicit", "2026-08-25"),

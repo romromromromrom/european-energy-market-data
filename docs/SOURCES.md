@@ -24,3 +24,8 @@ EPEX est interrogé après lecture dynamique du formulaire : aucun cookie ou
 `form_build_id` n'est codé en dur. Les profondeurs historiques sont constatées
 durant le backfill, jamais supposées. Toute redistribution doit respecter les
 licences EPEX SPOT et RTE applicables.
+
+L'endpoint RTE `/v1/price/table` alimente séparément les prix moyens pondérés,
+marginaux et par réserve, le `clearing_price`, ainsi que `pre.positive` et
+`pre.negative` comme prix des écarts. Les chaînes numériques sont converties en
+EUR/MWh et les absences restent NULL.

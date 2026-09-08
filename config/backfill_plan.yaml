@@ -82,6 +82,18 @@ rte_balancing_volumes_fr:
   requested_end: today
   mode: explicit
   status: PENDING
+rte_balancing_prices_fr:
+  dataset_id: rte_balancing_prices_fr
+  source: RTE
+  collector: rte_prices
+  partitioning: day
+  scope: FR reserve and imbalance prices
+  priority: 1
+  legal_class: open_data
+  requested_start: 2026-09-07
+  requested_end: today
+  mode: explicit
+  status: PENDING
 eex_fr_peak_year:
   dataset_id: eex_fr_peak_year
   source: EEX

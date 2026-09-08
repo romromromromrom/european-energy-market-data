@@ -66,7 +66,7 @@ BRIEF_FIELDS = [
     "period_start", "period_end", "baseload_eur_mwh", "peakload_eur_mwh",
     "reconstructed_baseload_eur_mwh", "minimum_eur_mwh", "maximum_eur_mwh",
     "amplitude_eur_mwh", "tb2_eur_mwh", "tb4_eur_mwh", "direction",
-    "reserve_type", "metric", "value", "unit", "source_field",
+    "reserve_type", "metric", "value", "unit", "source_field", "price_type", "price_eur_mwh",
 ]
 
 
@@ -137,6 +137,8 @@ def build_brief_rows(conn: sqlite3.Connection, end_date: date, days: int = 7) ->
         value=dict(item); rows.append({**common,**value,"record_type":"day_ahead_index","data_date":value["delivery_date"],"source":"EPEX Day-Ahead / SDAC — FR Baseload","settlement":value["baseload_eur_mwh"],"price_unit":"EUR/MWh"})
     for item in conn.execute("SELECT * FROM rte_balancing_volumes WHERE delivery_date BETWEEN ? AND ? ORDER BY delivery_date,period_start,source_field,direction",(start,end)):
         value=dict(item); rows.append({**common,**value,"record_type":"rte_balancing_volume","data_date":value["delivery_date"],"source":"RTE Balancing"})
+    for item in conn.execute("SELECT * FROM rte_balancing_prices WHERE delivery_date BETWEEN ? AND ? ORDER BY delivery_date,period_start,source_field,direction",(start,end)):
+        value=dict(item); rows.append({**common,**value,"record_type":"rte_balancing_price","data_date":value["delivery_date"],"source":"RTE Balancing Prices","settlement":value["price_eur_mwh"],"price_unit":"EUR/MWh"})
 
     for item in gaps(conn, None, start, end)["data"]:
         rows.append({**common, **item, "record_type": "gap", "source": item["source_attempted"]})

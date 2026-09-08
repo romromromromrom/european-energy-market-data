@@ -6,6 +6,7 @@ import pytest
 from energy_scraper.collectors.eex import PRODUCTS, default_maturities, normalize_maturity
 from energy_scraper.collectors.epex_spot import parse_epex_ajax
 from energy_scraper.collectors.rte_balancing import parse_rte_payload
+from energy_scraper.collectors.rte_prices import parse_rte_prices
 
 
 def test_eex_month_and_quarter_maturities_cross_year():
@@ -41,3 +42,16 @@ def test_rte_observed_schema_preserves_nulls():
     assert len(rows) == 96 * 5
     assert any(row["source_field"] == "afrr" and row["direction"] == "rise" and row["value"] is None for row in rows)
     assert {row["unit"] for row in rows} == {"MWh"}
+
+def test_rte_price_mapping_and_nulls():
+    from energy_scraper.core.calendars import local_intervals
+    payload={"values":[],"updatedDate":"2026-09-08T23:59:00+02:00"}
+    for _,local in local_intervals(date(2026,9,8),15):
+        payload["values"].append({"date":local.isoformat(),"weighted_average_price":{"rise":"-42.73","drop":"57.65"},
+          "marginal_price":{"rise":"-9.29","drop":"14.79"},"weighted_average_price_mfrr":{"rise":None,"drop":"133.4"},
+          "clearing_price":"160.62","pre":{"positive":"54.5","negative":"60.8"}})
+    rows,updated=parse_rte_prices(payload,date(2026,9,8))
+    assert len(rows)==96*19
+    assert next(r for r in rows if r["price_type"]=="clearing")["price_eur_mwh"]==160.62
+    assert next(r for r in rows if r["price_type"]=="imbalance" and r["direction"]=="positive")["price_eur_mwh"]==54.5
+    assert any(r["price_type"]=="weighted_average_price_mfrr" and r["direction"]=="rise" and r["price_eur_mwh"] is None for r in rows)

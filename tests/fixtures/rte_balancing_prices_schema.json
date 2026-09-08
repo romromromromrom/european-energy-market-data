@@ -1,0 +1,16 @@
+{
+  "values": [{
+    "weighted_average_price": {"rise": "-42.73", "drop": "57.65"},
+    "marginal_price": {"rise": "-9.29", "drop": "14.79"},
+    "weighted_average_price_as": {"rise": null, "drop": null},
+    "weighted_average_price_margin": {"rise": null, "drop": null},
+    "weighted_average_price_mfrr": {"rise": null, "drop": "133.4"},
+    "weighted_average_price_rr": {"rise": null, "drop": "14.79"},
+    "weighted_average_price_afrr_activated_for_fr": {"rise": "-9.29", "drop": "65.15"},
+    "weighted_average_price_meas": {"rise": null, "drop": null},
+    "clearing_price": "160.62",
+    "pre": {"positive": "54.5", "negative": "60.8"},
+    "date": "2026-09-08T16:00:00+02:00"
+  }],
+  "updatedDate": "2026-09-08T16:17:44+02:00"
+}
