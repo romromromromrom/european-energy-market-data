@@ -1,0 +1,21 @@
+{
+  "values": [
+    {
+      "date": "2026-09-07T00:00:00+02:00",
+      "fcr": {"rise": 2.23, "drop": 7.79},
+      "afrr": {"rise": 1.53, "drop": 25.28},
+      "mfrr": {"rise": null, "drop": null},
+      "rr": {"rise": null, "drop": null},
+      "rr_standard": null,
+      "activation_non_pc": {"rise": 0.0, "drop": 5.25},
+      "deltap": -40.91,
+      "igcc": 0.45,
+      "countertrading_xb_redispatching": {"rise": null, "drop": null},
+      "tso_mutual_emergency": {"rise": null, "drop": null},
+      "xb_balancing": null,
+      "volume_mfrr_SA": {"rise": null, "drop": null},
+      "volume_mfrr_DA": {"rise": null, "drop": null}
+    }
+  ],
+  "updatedDate": "2026-09-08T08:27:01+02:00"
+}

@@ -12,6 +12,8 @@ import yaml
 from .api.app import create_app
 from .browser.network_capture import run_capture
 from .collectors.eex import EexCollector
+from .collectors.epex_spot import EpexSpotCollector
+from .collectors.rte_balancing import RteBalancingCollector
 from .collectors.nordpool import NordPoolCollector
 from .core.config import Settings
 from .core.database import Database
@@ -62,10 +64,10 @@ def run_backfill(force:bool=typer.Option(False,"--force",help="Re-fetch partitio
 
 
 @collect_app.command("eex")
-def collect_eex(start:str|None=typer.Option(None),end:str|None=typer.Option(None),years:str|None=typer.Option(None),codes:str="F7BY,F7PY,G3BY",force:bool=False,ticker:bool=False):
+def collect_eex(start:str|None=typer.Option(None),end:str|None=typer.Option(None),years:str|None=typer.Option(None),codes:str="F7BY,F7PY,G3BY",maturities:str|None=typer.Option(None),force:bool=False,ticker:bool=False):
     settings,db=context(); end_date=parse_date(end,"end") or date.today(); start_date=parse_date(start,"start") or end_date-timedelta(days=7)
     collector=EexCollector(settings,db); parsed_years=[int(x) for x in years.split(",")] if years else None
-    result=collector.collect(start_date,end_date,parsed_years,codes.split(","),force)
+    result=collector.collect(start_date,end_date,parsed_years,codes.split(","),force,[x.strip() for x in maturities.split(",")] if maturities else None,end_date)
     if ticker:
         for code in codes.split(","):
             for year in parsed_years or range(date.today().year+1,date.today().year+4):
@@ -81,11 +83,23 @@ def collect_nordpool(date_:str|None=typer.Option(None,"--date"),start:str|None=N
     result=NordPoolCollector(settings,db).collect(start_date,end_date,[x.strip() for x in areas.split(",") if x.strip()],force,mode)
     typer.echo(json.dumps(result,indent=2))
 
+@collect_app.command("epex")
+def collect_epex(date_:str|None=typer.Option(None,"--date"),start:str|None=None,end:str|None=None,force:bool=False):
+    settings,db=context(); selected=parse_date(date_,"date"); finish=selected or parse_date(end,"end") or date.today(); begin=selected or parse_date(start,"start") or finish
+    if begin>finish: raise typer.BadParameter("start must be <= end")
+    typer.echo(json.dumps(EpexSpotCollector(settings,db).collect(begin,finish,force),indent=2))
+
+@collect_app.command("rte-balancing")
+def collect_rte_balancing(date_:str|None=typer.Option(None,"--date"),start:str|None=None,end:str|None=None,force:bool=False):
+    settings,db=context(); selected=parse_date(date_,"date"); finish=selected or parse_date(end,"end") or date.today()-timedelta(days=1); begin=selected or parse_date(start,"start") or finish
+    if begin>finish: raise typer.BadParameter("start must be <= end")
+    typer.echo(json.dumps(RteBalancingCollector(settings,db).collect(begin,finish,force),indent=2))
+
 
 @collect_app.command("all")
 def collect_all(date_:str|None=typer.Option(None,"--date")):
     settings,db=context(); day=parse_date(date_,"date") or date.today()
-    typer.echo(json.dumps({"eex":EexCollector(settings,db).collect(day-timedelta(days=7),day),"nordpool":NordPoolCollector(settings,db).collect(day,day,["FR","BE","DE-LU"])},indent=2))
+    typer.echo(json.dumps({"eex":EexCollector(settings,db).collect(day-timedelta(days=7),day),"epex":EpexSpotCollector(settings,db).collect(day,day),"rte_balancing":RteBalancingCollector(settings,db).collect(day-timedelta(days=1),day-timedelta(days=1)),"nordpool":NordPoolCollector(settings,db).collect(day,day,["FR","BE","DE-LU"])},indent=2))
 
 
 @collect_app.command("daily")
@@ -94,13 +108,20 @@ def collect_daily(date_:str|None=typer.Option(None,"--date",help="Reference day;
     settings,db=context(); day=parse_date(date_,"date") or date.today(); results={}; errors={}
     try:
         results["eex"]=EexCollector(settings,db).collect(day-timedelta(days=7),day)
+        if results["eex"].get("errors"): errors["eex"]=f"{results['eex']['errors']} partition(s) failed"
     except Exception as exc:
         errors["eex"]=str(exc)
     try:
         delivery_day=day-timedelta(days=1)
         results["nordpool"]=NordPoolCollector(settings,db).collect(delivery_day,delivery_day,["FR","BE","DE-LU"])
+        if results["nordpool"].get("errors"): errors["nordpool"]=f"{results['nordpool']['errors']} partition(s) failed"
     except Exception as exc:
         errors["nordpool"]=str(exc)
+    for name,operation in (("epex",lambda:EpexSpotCollector(settings,db).collect(day,day)),("rte_balancing",lambda:RteBalancingCollector(settings,db).collect(day-timedelta(days=1),day-timedelta(days=1)))):
+        try:
+            results[name]=operation()
+            if results[name].get("errors"): errors[name]=f"{results[name]['errors']} partition(s) failed"
+        except Exception as exc: errors[name]=str(exc)
     payload={"reference_date":str(day),"results":results,"errors":errors,"status":"SUCCESS" if not errors else "PARTIAL"}
     typer.echo(json.dumps(payload,indent=2))
     if errors: raise typer.Exit(1)
@@ -120,14 +141,14 @@ def validate():
 def status():
     _,db=context()
     with db.connect() as conn:
-        result={"runs":conn.execute("SELECT COUNT(*) FROM scrape_runs").fetchone()[0],"futures":conn.execute("SELECT COUNT(*) FROM market_prices").fetchone()[0],"intraday":conn.execute("SELECT COUNT(*) FROM intraday_contract_stats").fetchone()[0],"open_gaps":conn.execute("SELECT COUNT(*) FROM data_gaps WHERE gap_status='OPEN'").fetchone()[0]}
+        result={"runs":conn.execute("SELECT COUNT(*) FROM scrape_runs").fetchone()[0],"futures":conn.execute("SELECT COUNT(*) FROM market_prices").fetchone()[0],"intraday":conn.execute("SELECT COUNT(*) FROM intraday_contract_stats").fetchone()[0],"day_ahead":conn.execute("SELECT COUNT(*) FROM epex_day_ahead_prices").fetchone()[0],"balancing":conn.execute("SELECT COUNT(*) FROM rte_balancing_volumes").fetchone()[0],"open_gaps":conn.execute("SELECT COUNT(*) FROM data_gaps WHERE gap_status='OPEN'").fetchone()[0]}
     typer.echo(json.dumps(result,indent=2))
 
 
 @app.command("export")
 def export(dataset:str,start:str,end:str,output:Path=Path("export.csv")):
-    _,db=context(); specs={"futures":("market_prices","trading_date"),"intraday":("intraday_contract_stats","delivery_date")}
-    if dataset not in specs: raise typer.BadParameter("dataset must be futures or intraday")
+    _,db=context(); specs={"futures":("market_prices","trading_date"),"intraday":("intraday_contract_stats","delivery_date"),"day-ahead":("epex_day_ahead_prices","delivery_date"),"day-ahead-indices":("epex_day_ahead_indices","delivery_date"),"balancing-volumes":("rte_balancing_volumes","delivery_date")}
+    if dataset not in specs: raise typer.BadParameter(f"dataset must be one of {', '.join(specs)}")
     table,column=specs[dataset]; start_date=parse_date(start,"start"); end_date=parse_date(end,"end")
     with db.connect(read_only=True) as conn:
         rows=conn.execute(f"SELECT * FROM {table} WHERE {column} BETWEEN ? AND ?",(str(start_date),str(end_date))).fetchall()

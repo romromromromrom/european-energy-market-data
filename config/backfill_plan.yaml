@@ -10,6 +10,78 @@ eex_fr_base_year:
   requested_end: today
   mode: max
   status: PENDING
+eex_fr_base_month:
+  dataset_id: eex_fr_base_month
+  source: EEX
+  collector: eex
+  partitioning: code+maturity+window
+  scope: FR Base Month settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: explicit
+  status: PENDING
+eex_fr_base_quarter:
+  dataset_id: eex_fr_base_quarter
+  source: EEX
+  collector: eex
+  partitioning: code+maturity+window
+  scope: FR Base Quarter settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: explicit
+  status: PENDING
+eex_fr_peak_month:
+  dataset_id: eex_fr_peak_month
+  source: EEX
+  collector: eex
+  partitioning: code+maturity+window
+  scope: FR Peak Month settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: explicit
+  status: PENDING
+eex_fr_peak_quarter:
+  dataset_id: eex_fr_peak_quarter
+  source: EEX
+  collector: eex
+  partitioning: code+maturity+window
+  scope: FR Peak Quarter settlements
+  priority: 1
+  legal_class: public_api
+  requested_start: 2024-01-01
+  requested_end: today
+  mode: explicit
+  status: PENDING
+epex_day_ahead_fr:
+  dataset_id: epex_day_ahead_fr
+  source: EPEX SPOT
+  collector: epex
+  partitioning: day
+  scope: FR SDAC 15-minute Day-Ahead
+  priority: 1
+  legal_class: public_market_results
+  requested_start: 2026-09-08
+  requested_end: today
+  mode: explicit
+  status: PENDING
+rte_balancing_volumes_fr:
+  dataset_id: rte_balancing_volumes_fr
+  source: RTE
+  collector: rte_balancing
+  partitioning: day
+  scope: FR balancing volumes
+  priority: 1
+  legal_class: open_data
+  requested_start: 2026-09-07
+  requested_end: today
+  mode: explicit
+  status: PENDING
 eex_fr_peak_year:
   dataset_id: eex_fr_peak_year
   source: EEX

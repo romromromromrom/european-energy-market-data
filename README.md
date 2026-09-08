@@ -5,11 +5,22 @@ reprenable et auditable. Les observations normalisées sont stockées dans SQLit
 chaque collecte conserve également le payload source compressé et les informations
 d'exécution nécessaires pour retracer son origine.
 
-Le projet est en version initiale. Deux sources sont réellement collectées :
+Quatre sources sont réellement collectées :
 
 - **EEX** : prix de règlement quotidiens et snapshots `price-ticker` des futures
-  France Base, France Peak et TTF ;
+  France Base, France Peak et TTF, dont les produits France Month/Quarter ;
+- **EPEX SPOT** : enchère France Day-Ahead SDAC en pas de 15 minutes ;
+- **RTE** : volumes d'équilibrage français en pas de 15 minutes ;
 - **Nord Pool** : statistiques intraday PH, HH et QH pour FR, BE et DE-LU.
+
+Le prix spot France de référence est le Baseload EPEX Day-Ahead publié. Le VWAP
+Nord Pool reste explicitement une statistique intraday.
+
+```bash
+energy-scraper collect eex --codes F7BM,F7BQ,F7PM,F7PQ --maturities 202610,202701
+energy-scraper collect epex --date 2026-09-08
+energy-scraper collect rte-balancing --date 2026-09-07
+```
 
 Les autres sources du catalogue sont des pistes d'intégration. Le collecteur ne
 fabrique aucune donnée manquante et ne contourne ni authentification, ni paywall,

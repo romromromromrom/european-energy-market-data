@@ -90,6 +90,29 @@ CREATE TABLE IF NOT EXISTS intraday_contract_stats (
  quality_status TEXT NOT NULL DEFAULT 'valid', raw_payload_hash TEXT,
  UNIQUE(source_id, delivery_area, contract_id, source_update_time)
 );
+CREATE TABLE IF NOT EXISTS epex_day_ahead_prices (
+ id INTEGER PRIMARY KEY AUTOINCREMENT, source_id TEXT NOT NULL, market_area TEXT NOT NULL,
+ market TEXT NOT NULL, modality TEXT NOT NULL, sub_modality TEXT NOT NULL, product TEXT NOT NULL,
+ trading_date TEXT NOT NULL, delivery_date TEXT NOT NULL, period_start TEXT NOT NULL, period_end TEXT NOT NULL,
+ timezone TEXT NOT NULL, price_eur_mwh REAL, buy_volume_mwh REAL, sell_volume_mwh REAL, volume_mwh REAL,
+ source_update_time TEXT, collected_at TEXT NOT NULL, run_id TEXT NOT NULL, raw_payload_hash TEXT,
+ quality_status TEXT NOT NULL DEFAULT 'valid', UNIQUE(source_id,market_area,delivery_date,period_start)
+);
+CREATE TABLE IF NOT EXISTS epex_day_ahead_indices (
+ id INTEGER PRIMARY KEY AUTOINCREMENT, source_id TEXT NOT NULL, market_area TEXT NOT NULL,
+ trading_date TEXT NOT NULL, delivery_date TEXT NOT NULL, baseload_eur_mwh REAL, peakload_eur_mwh REAL,
+ reconstructed_baseload_eur_mwh REAL, baseload_difference_eur_mwh REAL, minimum_eur_mwh REAL,
+ maximum_eur_mwh REAL, amplitude_eur_mwh REAL, tb2_eur_mwh REAL, tb4_eur_mwh REAL,
+ source_update_time TEXT, collected_at TEXT NOT NULL, run_id TEXT NOT NULL, raw_payload_hash TEXT,
+ quality_status TEXT NOT NULL DEFAULT 'valid', UNIQUE(source_id,market_area,delivery_date)
+);
+CREATE TABLE IF NOT EXISTS rte_balancing_volumes (
+ id INTEGER PRIMARY KEY AUTOINCREMENT, delivery_date TEXT NOT NULL, period_start TEXT NOT NULL,
+ period_end TEXT NOT NULL, timezone TEXT NOT NULL, direction TEXT, reserve_type TEXT, metric TEXT NOT NULL DEFAULT 'volume',
+ value REAL, unit TEXT, source_field TEXT NOT NULL, source_update_time TEXT, collected_at TEXT NOT NULL,
+ source_id TEXT NOT NULL, run_id TEXT NOT NULL, raw_payload_hash TEXT, quality_status TEXT NOT NULL DEFAULT 'valid',
+ UNIQUE(source_id,delivery_date,period_start,direction,reserve_type,metric,source_field)
+);
 CREATE TABLE IF NOT EXISTS collection_partitions (
  dataset_id TEXT NOT NULL, partition_key TEXT NOT NULL, status TEXT NOT NULL,
  collected_at TEXT NOT NULL, records_received INTEGER NOT NULL, run_id TEXT NOT NULL,
@@ -133,6 +156,8 @@ CREATE TABLE IF NOT EXISTS manual_gap_fills (
 );
 CREATE INDEX IF NOT EXISTS ix_market_prices_date ON market_prices(trading_date, instrument_id);
 CREATE INDEX IF NOT EXISTS ix_intraday_area_date ON intraday_contract_stats(delivery_area, delivery_date);
+CREATE INDEX IF NOT EXISTS ix_epex_date ON epex_day_ahead_prices(market_area,delivery_date);
+CREATE INDEX IF NOT EXISTS ix_rte_balancing_date ON rte_balancing_volumes(delivery_date);
 CREATE INDEX IF NOT EXISTS ix_gaps_query ON data_gaps(dataset_id, gap_status, expected_timestamp_utc);
 CREATE INDEX IF NOT EXISTS ix_runs_started ON scrape_runs(started_at);
 CREATE INDEX IF NOT EXISTS ix_backfill_executions_started ON backfill_executions(started_at);
@@ -172,6 +197,8 @@ class Database:
                 [
                     ("eex", "EEX Market Data", "https://api.eex-group.com/pub/market-data", "exchange_api", "Public endpoint; verify EEX terms before redistribution.", "direct_api", 1),
                     ("nordpool", "Nord Pool Data Portal", "https://dataportal-api.nordpoolgroup.com/api/IntradayMarketStatistics", "exchange_api", "Use subject to Nord Pool data terms; private historical use only.", "direct_api", 1),
+                    ("epex", "EPEX SPOT Market Results", "https://www.epexspot.com/en/market-results", "exchange_web", "Public market-results page; redistribution remains subject to EPEX SPOT terms.", "drupal_ajax", 1),
+                    ("rte", "RTE Balancing Volumes", "https://www.services-rte.com/cms/open_data/v1/balancing_volumes_prices/volumes/table", "public_api", "RTE open-data terms apply; preserve source attribution.", "direct_api", 1),
                 ],
             )
 

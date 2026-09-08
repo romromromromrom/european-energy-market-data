@@ -7,6 +7,8 @@ from typing import Any
 
 from energy_scraper.collectors.eex import EexCollector, PRODUCTS
 from energy_scraper.collectors.nordpool import NordPoolCollector
+from energy_scraper.collectors.epex_spot import EpexSpotCollector
+from energy_scraper.collectors.rte_balancing import RteBalancingCollector
 from energy_scraper.core.database import Database, utcnow
 from energy_scraper.core.wizard import validate_plan
 
@@ -28,7 +30,7 @@ class BackfillRunner:
 
     def run(self, trigger_source: str = "cli", force: bool = False) -> dict[str, Any]:
         plan = validate_plan(self.settings.backfill_plan_path)
-        actionable = [item for item in plan.values() if item["collector"] in {"eex", "nordpool"} and item["mode"] != "skip"]
+        actionable = [item for item in plan.values() if item["collector"] in {"eex", "nordpool", "epex", "rte_balancing"} and item["mode"] != "skip"]
         execution_id = str(uuid.uuid4())
         with self.db.connect() as conn:
             conn.execute(
@@ -51,6 +53,11 @@ class BackfillRunner:
                 totals["records_received"] += result["received"]
                 totals["records_inserted"] += result["inserted"]
                 totals["datasets_completed"] += 1
+            for item in (x for x in actionable if x["collector"] in {"epex","rte_balancing"}):
+                today=date.today(); start=self._date(str(item["requested_start"]),today); end=self._date(str(item["requested_end"]),today)
+                collector=EpexSpotCollector(self.settings,self.db) if item["collector"]=="epex" else RteBalancingCollector(self.settings,self.db)
+                result=collector.collect(start,end,force); results[item["dataset_id"]]={"status":"DONE",**result}
+                totals["records_received"] += result["received"]; totals["records_inserted"] += result["inserted"]; totals["datasets_completed"] += 1
             status = "SUCCESS"
             error = None
         except Exception as exc:

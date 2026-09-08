@@ -4,6 +4,14 @@ eex:
   fallback: playwright
   capture_network_on_fallback: true
   license_notes: "Publicly reachable market-data endpoint; verify EEX terms before redistribution. No paywall or authentication bypass."
+epex:
+  base_url: "https://www.epexspot.com/en/market-results"
+  method: drupal_ajax
+  license_notes: "Public market-results access; EPEX SPOT terms apply to reuse and redistribution."
+rte_balancing:
+  base_url: "https://www.services-rte.com/cms/open_data/v1/balancing_volumes_prices/volumes/table"
+  method: direct_api
+  license_notes: "RTE open-data attribution and reuse terms apply."
 nordpool:
   base_url: "https://dataportal-api.nordpoolgroup.com/api/IntradayMarketStatistics"
   areas: [FR, BE, DE-LU]

@@ -32,8 +32,11 @@ DATASETS = {
    "columns":["p.observation_id","i.product_code","i.maturity","i.market_area","p.trading_date","p.settlement","p.volume","p.open_interest","s.source_name AS source","p.observation_timestamp AS collected_at","p.data_type","p.quality_status"], "date":"p.trading_date", "area":"i.market_area", "instrument":"i.product_code"},
  "intraday": {"table":"intraday_contract_stats i JOIN sources s ON i.source_id=s.source_id",
    "columns":["i.snapshot_id","i.delivery_area","i.delivery_date","i.delivery_start","i.delivery_end","i.contract_id","i.contract_name","i.contract_type","i.resolution_minutes","i.open","i.high","i.low","i.close","i.vwap","i.vwap_1h","i.vwap_3h","i.volume","i.buy_volume","i.sell_volume","i.source_update_time","i.collected_at","i.price_unit","i.volume_unit","s.source_name AS source","i.data_type","i.quality_status"], "date":"i.delivery_date", "area":"i.delivery_area", "instrument":"i.contract_id"},
+ "day-ahead": {"table":"epex_day_ahead_prices d JOIN sources s ON d.source_id=s.source_id", "columns":["d.*","s.source_name AS source"], "date":"d.delivery_date", "area":"d.market_area", "instrument":"d.product"},
+ "day-ahead-indices": {"table":"epex_day_ahead_indices d JOIN sources s ON d.source_id=s.source_id", "columns":["d.*","s.source_name AS source"], "date":"d.delivery_date", "area":"d.market_area", "instrument":"d.market_area"},
+ "balancing-volumes": {"table":"rte_balancing_volumes b JOIN sources s ON b.source_id=s.source_id", "columns":["b.*","s.source_name AS source"], "date":"b.delivery_date", "area":"b.source_id", "instrument":"b.reserve_type"},
 }
-ALIASES={"market_prices":"futures","intraday_contract_stats":"intraday"}
+ALIASES={"market_prices":"futures","intraday_contract_stats":"intraday","epex_day_ahead_prices":"day-ahead","epex_day_ahead_indices":"day-ahead-indices","rte_balancing_volumes":"balancing-volumes"}
 
 
 def encode_cursor(value: int) -> str:
@@ -159,7 +162,9 @@ def create_app(settings: Settings | None=None) -> FastAPI:
             fut=dict(conn.execute("SELECT COUNT(*),MIN(trading_date),MAX(trading_date) FROM market_prices").fetchone())
             intra=dict(conn.execute("SELECT COUNT(*),MIN(delivery_date),MAX(delivery_date) FROM intraday_contract_stats").fetchone())
             gaps=conn.execute("SELECT COUNT(*) FROM data_gaps WHERE gap_status='OPEN'").fetchone()[0]
-        return {"meta":{"row_count":2},"data":{"datasets":{"futures":fut,"intraday":intra},"sources":sources,"open_gaps":gaps}}
+            day_ahead=dict(conn.execute("SELECT COUNT(*),MIN(delivery_date),MAX(delivery_date) FROM epex_day_ahead_prices").fetchone())
+            balancing=dict(conn.execute("SELECT COUNT(*),MIN(delivery_date),MAX(delivery_date) FROM rte_balancing_volumes").fetchone())
+        return {"meta":{"row_count":4},"data":{"datasets":{"futures":fut,"intraday":intra,"day-ahead":day_ahead,"balancing-volumes":balancing},"sources":sources,"open_gaps":gaps}}
 
     @app.get("/v1/coverage")
     def coverage(_:None=Depends(authorize)):
@@ -171,7 +176,7 @@ def create_app(settings: Settings | None=None) -> FastAPI:
         return {"meta":{"row_count":len(rows)},"data":rows}
 
     @app.get("/v1/latest")
-    def latest(dataset:str=Query(pattern="^(futures|intraday)$"),area:str|None=None,_:None=Depends(authorize)):
+    def latest(dataset:str=Query(pattern="^(futures|intraday|day-ahead|day-ahead-indices|balancing-volumes)$"),area:str|None=None,_:None=Depends(authorize)):
         spec=DATASETS[dataset]; where=f" WHERE {spec['area']}=?" if area else ""; params=(area,) if area else ()
         sql=f"SELECT {','.join(spec['columns'])} FROM {spec['table']}{where} ORDER BY {spec['date']} DESC LIMIT 1"
         with ro() as conn:
@@ -227,6 +232,18 @@ def create_app(settings: Settings | None=None) -> FastAPI:
               ORDER BY i.maturity""")]
         return {"meta":{"row_count":len(rows)},"data":rows}
 
+    @app.get("/v1/day-ahead")
+    def day_ahead(area:str|None=None,start:str|None=None,end:str|None=None,limit:int=Query(1000,ge=1),cursor:str|None=None,_:None=Depends(authorize)):
+        return series("day-ahead",area=area,start=start,end=end,limit=limit,cursor=cursor)
+
+    @app.get("/v1/day-ahead/indices")
+    def day_ahead_indices(area:str|None=None,start:str|None=None,end:str|None=None,limit:int=Query(1000,ge=1),cursor:str|None=None,_:None=Depends(authorize)):
+        return series("day-ahead-indices",area=area,start=start,end=end,limit=limit,cursor=cursor)
+
+    @app.get("/v1/balancing/volumes")
+    def balancing_volumes(start:str|None=None,end:str|None=None,reserve_type:str|None=None,limit:int=Query(1000,ge=1),cursor:str|None=None,_:None=Depends(authorize)):
+        return series("balancing-volumes",instrument=reserve_type,start=start,end=end,limit=limit,cursor=cursor)
+
     @app.get("/v1/intraday/contracts")
     def contracts(area:str|None=None,start:str|None=None,end:str|None=None,resolution:int|None=None,limit:int=Query(1000,ge=1),cursor:str|None=None,_:None=Depends(authorize)):
         return series("intraday",area=area,start=start,end=end,resolution=resolution,limit=limit,cursor=cursor)
@@ -236,7 +253,7 @@ def create_app(settings: Settings | None=None) -> FastAPI:
         return series("intraday",area=area,start=start,end=end,limit=limit,cursor=cursor)
 
     @app.get("/v1/export")
-    def bounded_export(dataset:str=Query(pattern="^(futures|intraday)$"),start:str=Query(),end:str=Query(),
+    def bounded_export(dataset:str=Query(pattern="^(futures|intraday|day-ahead|day-ahead-indices|balancing-volumes)$"),start:str=Query(),end:str=Query(),
                        area:str|None=None,format:str=Query("csv",pattern="^csv$"),_:None=Depends(authorize)):
         spec=DATASETS[dataset]; where=[f"{spec['date']}>=?",f"{spec['date']}<=?"]; params:list[Any]=[start,end]
         if area: where.append(f"{spec['area']}=?"); params.append(area)
