@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import os
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import typer
@@ -21,6 +21,7 @@ from .core.database import Database
 from .core.backfill import BackfillRunner
 from .core.brief_export import export_brief_csv
 from .core.gaps import export_gap_template, import_gap_csv
+from .core.daily_report import write_daily_reports
 from .core.wizard import default_plan, run_wizard, serialize_plan, validate_plan
 
 app=typer.Typer(help="European energy market data collector",no_args_is_help=True)
@@ -112,7 +113,7 @@ def collect_all(date_:str|None=typer.Option(None,"--date")):
 @collect_app.command("daily")
 def collect_daily(date_:str|None=typer.Option(None,"--date",help="Reference day; defaults to today")):
     """Refresh EEX and the previous Nord Pool delivery day for the daily brief."""
-    settings,db=context(); day=parse_date(date_,"date") or date.today(); results={}; errors={}
+    settings,db=context(); day=parse_date(date_,"date") or date.today(); results={}; errors={}; started_at=datetime.now(UTC)
     try:
         results["eex"]=EexCollector(settings,db).collect(day-timedelta(days=7),day)
         if results["eex"].get("errors"): errors["eex"]=f"{results['eex']['errors']} partition(s) failed"
@@ -130,6 +131,8 @@ def collect_daily(date_:str|None=typer.Option(None,"--date",help="Reference day;
             if results[name].get("errors"): errors[name]=f"{results[name]['errors']} partition(s) failed"
         except Exception as exc: errors[name]=str(exc)
     payload={"reference_date":str(day),"results":results,"errors":errors,"status":"SUCCESS" if not errors else "PARTIAL"}
+    reports=write_daily_reports(db,settings.root,day,payload,started_at)
+    payload["reports"]={name:str(path) for name,path in reports.items()}
     typer.echo(json.dumps(payload,indent=2))
     if errors: raise typer.Exit(1)
 

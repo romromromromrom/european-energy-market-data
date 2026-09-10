@@ -9,5 +9,8 @@ logs/*.jsonl
 logs/*.log
 artifacts/network_discovery/*.json
 reports/morning_brief.csv
+reports/completude.md
+reports/completeness/
+reports/logs/
 !data/raw/.gitkeep
 !data/parquet/.gitkeep

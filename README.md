@@ -165,6 +165,16 @@ sources pour le brief du matin :
 .venv/bin/python -m energy_scraper collect daily
 ```
 
+Chaque exécution quotidienne produit automatiquement deux sorties lisibles :
+
+- `reports/logs/collecte-YYYY-MM-DD.log`, journal daté (les relances sont ajoutées
+  au même fichier), et `reports/logs/derniere-collecte.log` ;
+- `reports/completude.md`, état courant facile à lire, ainsi qu'une archive datée
+  dans `reports/completeness/completude-YYYY-MM-DD.md`.
+
+Le rapport de complétude sépare les échecs de la collecte du jour des gaps
+historiques déjà identifiés dans la grille d'observations attendues.
+
 Le déploiement nécessite un domaine Cloudflare, un tunnel vers l'API locale et
 Managed OAuth devant le Worker. Suivre le guide [ChatGPT MCP privé](docs/CHATGPT_MCP.md).
 
